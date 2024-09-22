@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const tempMovieData = [
   {
@@ -51,106 +51,24 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [movies, setMovies] = useState([]);
-  const [query, setQuery] = useState("inception");
-  const [watched, setWatched] = useState([]);
-  const [isLoading, setisLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [selecetId, setSelectedId] = useState(null);
-  const KEY = "258e258f";
-
-  // useEffect(function () {
-  //   console.log("when its mounting");
-  // }, []);
-  // useEffect(function () {
-  //   console.log("after every re-render");
-  // });
-  // console.log("During render");
-
-  // useEffect(
-  //   function () {
-  //     console.log("D");
-  //   },
-  //   [query]
-  // );
-
-  function handleSelectMovie(id) {
-    setSelectedId(id);
-  }
-
-  useEffect(
-    function () {
-      async function fetchMovies() {
-        try {
-          setisLoading(true);
-          setError("");
-          const response = await fetch(
-            `http://www.omdbapi.com/?apikey=${KEY}&s=${query}`
-          );
-          if (!response.ok) throw Error("somthing went wrong!");
-
-          const data = await response.json();
-          if (data.Response === "False") throw Error(data.Error);
-
-          setMovies(data.Search);
-        } catch (err) {
-          setError(err.message);
-        } finally {
-          setisLoading(false);
-        }
-      }
-
-      if (query.length < 3) {
-        setMovies([]);
-        setError("");
-        return;
-      }
-
-      fetchMovies();
-    },
-    [query]
-  );
-
+  const [movies, setMovies] = useState(tempMovieData);
+  const [watched, setWatched] = useState(tempWatchedData);
   return (
     <>
       <Navbar>
-        <Search query={query} setQuery={setQuery} />
+        <Search />
         <Numresults movies={movies} />
       </Navbar>
       <Main>
         <Box>
-          {/* {isLoading ? <Loader /> : <MovieList movies={movies} />} */}
-          {isLoading && <Loader />}
-          {!isLoading && !error && (
-            <MovieList movies={movies} onSelectMovie={handleSelectMovie} />
-          )}
-          {error && <ErrorMessage message={error} />}
+          <MovieList movies={movies} />
         </Box>
         <Box>
-          {selecetId ? (
-            <MovieDetails selecetId={selecetId} />
-          ) : (
-            <>
-              <WatchedSummary watched={watched} />
-              <WatchedMoviesList watched={watched} />
-            </>
-          )}
+          <WatchedSummary watched={watched} />
+          <WatchedMoviesList watched={watched} />
         </Box>
       </Main>
     </>
-  );
-}
-
-function Loader() {
-  return <p className="loader"> Loading... </p>;
-}
-
-function ErrorMessage({ message }) {
-  return (
-    <p className="error">
-      <span>!</span>
-      {message}
-    </p>
   );
 }
 
@@ -171,7 +89,9 @@ function Numresults({ movies }) {
   );
 }
 
-function Search({ query, setQuery }) {
+function Search() {
+  const [query, setQuery] = useState("");
+
   return (
     <input
       className="search"
@@ -227,19 +147,19 @@ function WatchedBox() {
   );
 }
 
-function MovieList({ movies, onSelectMovie }) {
+function MovieList({ movies }) {
   return (
     <ul className="list">
       {movies?.map((movie, i) => (
-        <Movie movie={movie} key={i} onSelectMovie={onSelectMovie} />
+        <Movie movie={movie} key={i} />
       ))}
     </ul>
   );
 }
 
-function Movie({ movie, onSelectMovie }) {
+function Movie({ movie }) {
   return (
-    <li key={movie.imdbID} onClick={() => onSelectMovie(movie.imdbID)}>
+    <li key={movie.imdbID}>
       <img src={movie.Poster} alt={`${movie.Title} poster`} />
       <h3>{movie.Title}</h3>
       <div>
@@ -250,10 +170,6 @@ function Movie({ movie, onSelectMovie }) {
       </div>
     </li>
   );
-}
-
-function MovieDetails({ selecetId }) {
-  return <div className="details">{selecetId}</div>;
 }
 
 function WatchedSummary({ watched }) {

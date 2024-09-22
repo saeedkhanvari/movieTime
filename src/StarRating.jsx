@@ -54,13 +54,14 @@ function StarRating({
               key={i}
               onRate={() => {
                 handleRating(i + 1);
+                setTemprating(i + 1);
               }}
               full={tempRating ? tempRating >= i + 1 : rating >= i + 1}
               onHoverIn={() => {
                 setTemprating(i + 1);
               }}
               onHoverOut={() => {
-                setTemprating(i + 1);
+                setTemprating(0);
               }}
               color={color}
               size={size}
